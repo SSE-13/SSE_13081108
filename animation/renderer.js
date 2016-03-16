@@ -3,6 +3,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var canvas = document.getElementById("game");
+var context = canvas.getContext("2d");
 /**
  * 基类，负责处理x,y,rotation 等属性
  */
@@ -67,15 +69,13 @@ var TextField = (function (_super) {
     };
     return TextField;
 }(DisplayObject));
-function drawQueue(queue) {
-    for (var i = 0; i < renderQueue.length; i++) {
-        var displayObject = renderQueue[i];
-        displayObject.draw(context);
-    }
-}
 var imagePool = {};
 function loadResource(imageList, callback) {
     var count = 0;
+    if (imageList.length == 0) {
+        callback();
+        return;
+    }
     imageList.forEach(function (imageUrl) {
         var image = new Image();
         image.src = imageUrl;
@@ -93,28 +93,36 @@ function loadResource(imageList, callback) {
         }
     });
 }
-var canvas = document.getElementById("game");
-var context = canvas.getContext("2d");
-var rect = new Rect();
-rect.width = 200;
-rect.height = 100;
-rect.color = '#00FF00';
-var rect2 = new Rect();
-rect2.width = 300;
-rect2.height = 50;
-rect2.x = 200;
-rect2.y = 200;
-rect2.rotation = Math.PI / 8;
-rect2.color = '#00FFFF';
-var text = new TextField();
-text.x = 10;
-var bitmap = new Bitmap();
-bitmap.source = 'wander-icon.jpg';
-//渲染队列
-var renderQueue = [rect, rect2, text, bitmap];
-//资源加载列表
-var imageList = ['wander-icon.jpg'];
-//先加载资源，加载成功之后执行渲染队列
-loadResource(imageList, function () {
-    drawQueue(renderQueue);
-});
+/**
+ * 渲染核心
+ */
+var RenderCore = (function () {
+    function RenderCore() {
+    }
+    /**
+     * 启动渲染核心
+     * @param renderQueue 渲染队列
+     * @param imageList 资源列表
+     */
+    RenderCore.prototype.start = function (renderQueue, resourceList) {
+        if (renderQueue === void 0) { renderQueue = []; }
+        if (resourceList === void 0) { resourceList = []; }
+        this.renderQueue = renderQueue;
+        var self = this;
+        loadResource(resourceList, function () {
+            requestAnimationFrame(self.onEnterFrame.bind(self));
+        });
+    };
+    RenderCore.prototype.onEnterFrame = function () {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        this.drawQueue(this.renderQueue);
+        requestAnimationFrame(this.onEnterFrame.bind(this));
+    };
+    RenderCore.prototype.drawQueue = function (queue) {
+        for (var i = 0; i < this.renderQueue.length; i++) {
+            var displayObject = this.renderQueue[i];
+            displayObject.draw(context);
+        }
+    };
+    return RenderCore;
+}());
