@@ -1,8 +1,6 @@
-var canvas: HTMLCanvasElement = document.getElementById("game") as HTMLCanvasElement;
-var context = canvas.getContext("2d");
 /**
  * 基类，负责处理x,y,rotation 等属性
- */
+ */ 
 class DisplayObject {
 
     x = 0;
@@ -69,16 +67,17 @@ class TextField extends DisplayObject {
     }
 }
 
-
+function drawQueue(queue) {
+    for (var i = 0; i < renderQueue.length; i++) {
+        var displayObject: DisplayObject = renderQueue[i];
+        displayObject.draw(context);
+    }
+}
 
 var imagePool = {};
 
 function loadResource(imageList, callback) {
     var count = 0;
-    if (imageList.length == 0) {
-        callback();
-        return;
-    }
     imageList.forEach(function(imageUrl) {
         var image = new Image();
         image.src = imageUrl;
@@ -92,46 +91,46 @@ function loadResource(imageList, callback) {
                 callback();
             }
         }
-
-        function onLoadError() {
+        
+        function onLoadError(){
             alert('资源加载失败:' + imageUrl);
         }
     })
 }
 
 
+var canvas: HTMLCanvasElement = document.getElementById("game") as HTMLCanvasElement;
+var context = canvas.getContext("2d");
 
-/**
- * 渲染核心
- */
-class RenderCore {
 
-    renderQueue;
-    /**
-     * 启动渲染核心
-     * @param renderQueue 渲染队列
-     * @param imageList 资源列表
-     */
-    start(renderQueue = [], resourceList = []) {
-        this.renderQueue = renderQueue;
-        var self = this;
-        loadResource(resourceList, function() {
-            requestAnimationFrame(self.onEnterFrame.bind(self));
-        })
+var rect = new Rect();
+rect.width = 200;
+rect.height = 100;
+rect.color = '#00FF00'
 
-    }
 
-    onEnterFrame() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        this.drawQueue(this.renderQueue);
-        requestAnimationFrame(this.onEnterFrame.bind(this));
-    }
+var rect2 = new Rect();
+rect2.width = 300;
+rect2.height = 50;
+rect2.x = 200;
+rect2.y = 200;
+rect2.rotation = Math.PI / 8;
+rect2.color = '#00FFFF'
 
-    drawQueue(queue) {
-        for (var i = 0; i < this.renderQueue.length; i++) {
-            var displayObject: DisplayObject = this.renderQueue[i];
-            displayObject.draw(context);
-        }
-    }
+var text = new TextField();
+text.x = 10;
 
-}
+var bitmap = new Bitmap();
+bitmap.source = 'wander-icon.jpg';
+
+//渲染队列
+var renderQueue = [rect, rect2, text,bitmap];
+//资源加载列表
+var imageList = ['wander-icon.jpg'];
+
+//先加载资源，加载成功之后执行渲染队列
+loadResource(imageList, function() {
+    drawQueue(renderQueue);
+})
+
+
