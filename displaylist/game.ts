@@ -1,0 +1,76 @@
+module game {
+
+
+}
+
+var human = new render.DisplayObjectContainer();
+human.x = 30;
+human.y = -10;
+var humanContainer = new render.DisplayObjectContainer();
+var head = new render.Bitmap();
+head.x = 10;
+head.y = -60;
+var trunk = new render.Bitmap();
+trunk.x = 10;
+trunk.y = -40;
+var left_arm = new render.Bitmap();
+left_arm.x = 10;
+left_arm.y = -30;
+var right_arm = new render.Bitmap();
+right_arm.x = 10;
+right_arm.y = -30;
+var left_leg = new render.Bitmap();
+left_leg.x = 10;
+left_leg.y = -30;
+var right_leg = new render.Bitmap();
+right_leg.x = 10;
+right_leg.y = -30;
+
+head.source = "head.png";
+trunk.source = "trunk.png";
+left_arm.source = "left_arm.png";
+right_arm.source = "right_arm.png";
+left_leg.source = "left_leg.png";
+right_leg.source = "right_leg.png";
+
+humanContainer.addChild(human);
+human.addChild(head);
+human.addChild(left_arm);
+human.addChild(right_arm);
+human.addChild(left_leg);
+human.addChild(right_leg);
+human.addChild(trunk);
+
+
+var renderCore = new render.RenderCore();
+renderCore.start(humanContainer, ["head.png","left_arm.png","right_arm.png","left_leg.png","right_leg.png","trunk.png"]);
+
+
+class HumanBody extends Body {
+
+
+    onTicker(duringTime: number) {
+
+        this.x += this.vx*duringTime;
+        this.rotation += Math.PI*duringTime;
+       
+
+    }
+}
+
+var ticker = new Ticker();
+var body = new HumanBody(humanContainer);
+body.vx = 4;
+body.y = 200;
+ticker.start([body]);
+
+
+
+
+
+
+
+
+
+
+
