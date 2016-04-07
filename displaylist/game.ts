@@ -4,8 +4,8 @@ module game {
 }
 
 var human = new render.DisplayObjectContainer();
-human.x = 30;
-human.y = -10;
+human.x = -10;
+human.y = 100;
 var humanContainer = new render.DisplayObjectContainer();
 var head = new render.Bitmap();
 head.x = 10;
