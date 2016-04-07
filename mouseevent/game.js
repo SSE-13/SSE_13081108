@@ -74,7 +74,7 @@ var HeadHitTest = function (localPoint, displayObject) {
 };
 var LegHitTest = function (localPoint, displayObject) {
     // alert (`点击位置为${localPoint.x},${localPoint.y}`);
-    if (localPoint.x >= 100 && localPoint.x <= 250 && localPoint.y >= 300 && localPoint.y <= 480 || localPoint.x >= 260 && localPoint.x <= 400 && localPoint.y >= 300 && localPoint.y < +480) {
+    if (localPoint.x >= 100 && localPoint.x <= 280 && localPoint.y >= 300 && localPoint.y <= 480 || localPoint.x >= 260 && localPoint.x <= 400 && localPoint.y >= 300 && localPoint.y < +480) {
         isLeg += 1;
         ClickedLeg = true;
     }
