@@ -1,8 +1,14 @@
 
 import * as fs from 'fs';
 
+    //撤销用
+    var history_row=new Array();
+    var history_col=new Array();
+    var history_val=new Array();
+    //=====================================
 
 
+//读取json
 function readFile() {
     var map_path = __dirname + "/map.json"
     var content = fs.readFileSync(map_path, "utf-8");
@@ -11,8 +17,19 @@ function readFile() {
     return mapData;
 }
 
+//写入json
+function  writeFile() {
+    console.log(mapData);
+    var map_path = __dirname + "/map.json"
+    var json="{\"map\":"+JSON.stringify(mapData)+"}";
+    console.log(json);
+    fs.writeFileSync(map_path,json,"utf-8");
+    console.log("saved");
+}
+
 
 function createMapEditor() {
+
     var world = new editor.WorldMap();
     var rows = mapData.length;
     var cols = mapData[0].length;
@@ -28,8 +45,7 @@ function createMapEditor() {
             tile.width = editor.GRID_PIXEL_WIDTH;
             tile.height = editor.GRID_PIXEL_HEIGHT;
             world.addChild(tile);
-
-
+            
             eventCore.register(tile, events.displayObjectRectHitTest, onTileClick);
         }
     }
@@ -37,20 +53,80 @@ function createMapEditor() {
 
 }
 
+//保存按钮触发条件
+var SaveHitTest = (localPoint:math.Point,displayObject:render.DisplayObject) =>{
+    if(localPoint.x>=0&&localPoint.x<=100&&localPoint.y>=0&&localPoint.y<=50)
+    return true;
+}
 
+//撤销按钮触发条件
+var UndoHitTest = (localPoint:math.Point,displayObject:render.DisplayObject) =>{
+    if(localPoint.x>=0&&localPoint.x<=100&&localPoint.y>=0&&localPoint.y<=50)
+    return true;
+}
 
+//撤销函数(不知怎么撤颜色= =)
+function UndoFunction() {
+    if(history_row.length<=0){ 
+        alert("已撤销至最后一步");
+        return;
+    }
+    else{
+        var r=history_row.pop();
+        var c=history_col.pop();
+        mapData[r][c]=history_val.pop();
+        //tile.setWalkable(mapData[tile.ownedRow][tile.ownedCol]);
+    }  
+    console.log("undone");
+}
+
+//点击事件
 function onTileClick(tile: editor.Tile) {
-    console.log(tile);
+    console.log(tile.ownedRow+" "+tile.ownedCol+" "+mapData[tile.ownedRow][tile.ownedCol]);  
+    history_row.push(tile.ownedRow);
+    history_col.push(tile.ownedCol);
+    history_val.push(mapData[tile.ownedRow][tile.ownedCol]);
+    mapData[tile.ownedRow][tile.ownedCol]=mapData[tile.ownedRow][tile.ownedCol]?0:1;
+    tile.setWalkable(mapData[tile.ownedRow][tile.ownedCol]);
+    console.log(tile.ownedRow+" "+tile.ownedCol+" "+mapData[tile.ownedRow][tile.ownedCol]);  
+}
+
+//保存按钮
+function onSaveClick() {
+    console.log("saving");
+    writeFile();    
+}
+
+//撤销按钮
+function onUndoClick() {
+    console.log("undo");
+    UndoFunction();    
 }
 
 
+//创建存储数据的数组、渲染、事件核心
 var mapData = readFile();
-
-
 var renderCore = new render.RenderCore();
 var eventCore = new events.EventCore();
 eventCore.init();
 
+//渲染相关
+var mainContainer=new render.DisplayObjectContainer();
+
+var button1=new render.Bitmap();
+button1.source="save.png";
+button1.y=250;
+var button2=new render.Bitmap();
+button2.source="undo.png";
+button2.x=150;
+button2.y=250;
 
 var editor = createMapEditor();
-renderCore.start(editor);
+
+mainContainer.addChild(button1);
+mainContainer.addChild(button2);
+mainContainer.addChild(editor);
+
+renderCore.start(mainContainer,["save.png","undo.png"]);
+eventCore.register(button1, SaveHitTest, onSaveClick);
+eventCore.register(button2, UndoHitTest, onUndoClick);
